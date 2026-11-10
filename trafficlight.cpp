@@ -80,7 +80,9 @@ int main()
             sf::CircleShape star (i % 3 == 0 ? 1.5f : 1.f);
             star.setPosition({static_cast<float>((i * 137 + 53) % 800), static_cast<float>((i * 71 + 17)% 330)});
             star.setFillColor(sf::Color(200, 200, 230));
+            double sinVal = std::sin(static_cast<double>(i) * 0.1);
             celestial.push_back(star);
+            
 
         }
 
@@ -143,7 +145,7 @@ int main()
     const float lampY[3] = { 117.5f, 362.5f, 240.f };
     const sf::Color dimColor[3] = { sf::Color(70, 12, 12), sf::Color(12, 70, 25), sf::Color(70, 60, 8)};
     const sf::Color brightColor[3] = { sf::Color(255, 50, 50), sf::Color(50, 255, 90), sf::Color(255, 215, 20)};
-    const float duration[3] = { 4.f, 4.f, 2.f}; 
+    const float duration[] = { 5.f, 5.f, 2.f}; 
     const char* stateName[3] = { "RED", "GREEN", "YELLOW"};
 
     sf::CircleShape lamp(45.f);
@@ -176,7 +178,25 @@ int main()
     bool started = false;
     float brightness[3] = {1.f, 0.f , 0.f};
     sf::Clock frameClock;
-
+    
+    auto startSim = [&](){
+        state = RED;
+        timer = 0.f;
+        running = true;
+        started = true;
+        };
+    auto resetSim = [&](){
+        state = RED;
+        timer = 0.f;
+        running = false;
+        started = false;
+        };
+    auto pauseSim = [&](){
+        running = false;
+        };
+    window.setKeyRepeatEnabled(false);
+     
+        
      while (window.isOpen())
     {
         float dt = std::min(frameClock.restart().asSeconds(), 0.1f);
@@ -207,13 +227,30 @@ int main()
                         timer = 0.f;
     
     
-                    
-             
+                    }
+                }   
+            }                  
+            else if (const auto* key = event->getIf<sf::Event::KeyPressed>())
+            {
+                if (key->code == sf::Keyboard::Key::Space)
+                {
+                    if (!started)
+                    {
+                        startSim();
+                    }
+                    else
+                    {
+                        running = !running;
                     }
                 }
+                else if (key->code == sf::Keyboard::Key::R)
+                {
+                    resetSim();
+                }
+
             }
-        }                
- 
+        }
+
          // Timing
          if (running)
          {
@@ -229,7 +266,7 @@ int main()
          for (int i = 0; i < 3; ++i)
          {
              float target = (i == state) ? 1.f : 0.f;
-             brightness[i] += (target - brightness[i]) * std::min(1.f, dt * 8.f);
+             brightness[i] += (target - brightness[i]) * std::min(1.f, dt * 10.f);
          }
  
          // UI text
@@ -292,8 +329,6 @@ int main()
          window.display();
     }
  
-     return 0;
+    return 0;
+
 }
- 
-    
-    
